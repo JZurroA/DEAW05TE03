@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-deaw
+    command:
+      - "--innodb_use_native_aio=0"
+      - "--default-authentication-plugin=mysql_native_password"
+      - "--skip-ssl"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user_management
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./bbdd:/var/lib/mysql
+    networks:
+      - backend
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mysql
+    ports:
+      - 8000:80
+    depends_on:
+      - mysql
+    networks:
+      - backend
+
+  myapp:
+    build:
+      context: .
+      dockerfile: java_img/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
